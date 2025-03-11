@@ -341,6 +341,39 @@ void sjf_non_preemptive()
     reset_process_states();
 
     // Implementation of rest of your code...
+     int current_time = 0;
+    int completed = 0;
+    
+    while (completed < num_processes) {
+        int shortest_job_index = -1;
+        int shortest_burst_time = INT_MAX;
+        
+        for (int i = 0; i < num_processes; i++) {
+            if (processes[i].arrival_time <= current_time && 
+                !processes[i].is_completed && 
+                processes[i].burst_time < shortest_burst_time) {
+                shortest_burst_time = processes[i].burst_time;
+                shortest_job_index = i;
+            }
+        }
+        
+        if (shortest_job_index == -1) {
+            current_time++;
+            continue;
+        }
+        
+        Process *current_process = &processes[shortest_job_index];
+        
+        current_process->waiting_time = current_time - current_process->arrival_time;
+        
+        current_time += current_process->burst_time;
+        
+        current_process->completion_time = current_time;
+        current_process->turnaround_time = current_process->completion_time - current_process->arrival_time;
+        
+        current_process->is_completed = true;
+        completed++;
+    }
 
     // Display results
     printf("***************************************************************************************\n\n");
@@ -358,6 +391,61 @@ void srt_preemptive()
     reset_process_states();
 
     // Implementation of rest of your code...
+    int current_time = 0;
+    int completed = 0;
+    int prev = -1;
+    
+    while (completed != num_processes)
+    {
+        int shortest_idx = -1;
+        int shortest_time = INT_MAX;
+        
+        for (int i = 0; i < num_processes; i++)
+        {
+            if (processes[i].arrival_time <= current_time && 
+                !processes[i].is_completed && 
+                processes[i].remaining_time < shortest_time)
+            {
+                shortest_idx = i;
+                shortest_time = processes[i].remaining_time;
+            }
+        }
+        
+        if (shortest_idx == -1)
+        {
+            current_time++;
+            continue;
+        }
+        
+        if (prev != shortest_idx && prev != -1)
+        {
+        }
+        
+        processes[shortest_idx].remaining_time--;
+        prev = shortest_idx;
+        
+        for (int i = 0; i < num_processes; i++)
+        {
+            if (i != shortest_idx && 
+                processes[i].arrival_time <= current_time && 
+                !processes[i].is_completed)
+            {
+                processes[i].waiting_time++;
+            }
+        }
+        
+        if (processes[shortest_idx].remaining_time == 0)
+        {
+            processes[shortest_idx].is_completed = true;
+            processes[shortest_idx].completion_time = current_time + 1;
+            processes[shortest_idx].turnaround_time = 
+                processes[shortest_idx].completion_time - processes[shortest_idx].arrival_time;
+            
+            completed++;
+        }
+        
+        current_time++;
+    }
 
     printf("***************************************************************************************\n\n");
     printf("SRT (Preemptive) Statistics...\n");
