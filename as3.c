@@ -462,6 +462,29 @@ void round_robin(int time_quantum)
     reset_process_states();
 
     // Implementation of rest of your code...
+    int current_time = 0, completed = 0;
+    while (completed < num_processes)
+    {
+        bool done = true;
+        for (int i = 0; i < num_processes; i++)
+        {
+            if (processes[i].remaining_time > 0)
+            {
+                done = false;
+                int execution_time = (processes[i].remaining_time > time_quantum) ? time_quantum : processes[i].remaining_time;
+                processes[i].remaining_time -= execution_time;
+                current_time += execution_time;
+                if (processes[i].remaining_time == 0)
+                {
+                    processes[i].completion_time = current_time;
+                    processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
+                    processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
+                    completed++;
+                }
+            }
+        }
+        if (done) break;
+    }
 
     printf("***************************************************************************************\n\n");
     printf("RR Statistics (Time Quantum = %d)...\n", time_quantum);
