@@ -478,9 +478,14 @@ void round_robin(int time_quantum)
     while (completed < num_processes)
     {
         bool done = true;
+        bool empty = true;
         for (int i = 0; i < num_processes; i++)
         {
-            if (processes[i].remaining_time > 0)
+            if(processes[i].is_completed == false && processes[i].arrival_time <= current_time) {
+                empty = false;
+                printf("%d, %d", current_time, i);
+            }
+            if (processes[i].arrival_time <= current_time && processes[i].remaining_time > 0)
             {
                 done = false;
                 int execution_time = (processes[i].remaining_time > time_quantum) ? time_quantum : processes[i].remaining_time;
@@ -492,10 +497,13 @@ void round_robin(int time_quantum)
                     processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
                     processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
                     completed++;
+                    processes[i].is_completed = true;
                 }
             }
         }
-        if (done) break;
+        if(empty){
+            current_time += 1;
+        } else if (done) break;
     }
 
     printf("***************************************************************************************\n\n");
