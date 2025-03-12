@@ -296,31 +296,43 @@ void fcfs()
 
     // Implementation of rest of your code...
     int time = 0;
-    int size = 0;
-    Process* cur = NULL;
     int completed = num_processes;
+    int cur = -1;
 
-    Queue q;
-    initQueue(&q);
-    while(completed != 0){
-        while(size < num_processes && processes[size].arrival_time == time){
-            enqueue(&q, &processes[size]);
-            size += 1;
-        }
+    while(completed != -1){
+        if(cur != -1) processes[cur].remaining_time -= 1;
 
-        if(cur == NULL){
-            cur = dequeue(&q);
-        }
-        cur->remaining_time -= 1;
-        incrementWaitingTime(&q);
         
-        if(cur->remaining_time == 0){
+        for(int i = 0; i < num_processes; i++){
+            if(cur != i && processes[i].is_completed == false && time > processes[i].arrival_time){
+                if(i == 4){
+                    printf("%d\n", time);
+                }
+                processes[i].waiting_time += 1;
+            }
+        }
+        
+        
+
+        
+        if(processes[cur].remaining_time == 0){
             completed -= 1;
-            cur->completion_time = time;
-            cur = NULL;
+            processes[cur].completion_time = time;
+            processes[cur].is_completed = true;
+            cur = -1;
+        }
+        
+        if(cur == -1){
+            for(int i = 0; i < num_processes; i++){
+                if(time >= processes[i].arrival_time && processes[i].is_completed == false){
+                    cur = i;
+                    break;
+                }
+            }
         }
         time += 1;
     }
+    printf("time ends %d", time - 1);
 
     for(int i = 0; i < num_processes; i++){
         processes[i].turnaround_time = processes[i].waiting_time + processes[i].burst_time;
